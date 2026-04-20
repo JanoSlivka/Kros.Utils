@@ -174,15 +174,19 @@ namespace Kros.Data
         public virtual void InitDatabaseForIdGenerator()
         {
             using (ConnectionHelper.OpenConnection(Connection))
-            using (DbCommand cmd = Connection.CreateCommand())
+            using (SqlCommand cmd = (SqlCommand)Connection.CreateCommand())
             {
                 cmd.CommandText = BackendTableScript;
                 cmd.ExecuteNonQuery();
 
                 cmd.CommandText =
-                    $"IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = '{BackendStoredProcedureName}' AND type = 'P')"
-                    + Environment.NewLine
-                    + $"EXEC('{BackendStoredProcedureScript.Replace("'", "''")}');";
+                    "IF NOT EXISTS (SELECT * FROM sys.procedures WHERE name = @procName AND type = 'P') "
+                    + "BEGIN "
+                    + "    DECLARE @sql NVARCHAR(MAX) = @procScript; "
+                    + "    EXEC sp_executesql @sql; "
+                    + "END";
+                cmd.Parameters.Add("@procName", SqlDbType.NVarChar, 128).Value = BackendStoredProcedureName;
+                cmd.Parameters.Add("@procScript", SqlDbType.NVarChar, -1).Value = BackendStoredProcedureScript;
                 cmd.ExecuteNonQuery();
             }
         }
