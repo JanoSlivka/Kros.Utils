@@ -128,15 +128,13 @@ namespace Kros.Data
         /// <returns>Next ID.</returns>
         protected virtual T GetNewIdFromDbCore()
         {
-            using (SqlCommand cmd = (SqlCommand)Connection.CreateCommand())
-            {
-                cmd.CommandText = BackendStoredProcedureName;
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add(new SqlParameter("@TableName", SqlDbType.NVarChar) { Value = TableName });
-                cmd.Parameters.Add(new SqlParameter("@NumberOfItems", SqlDbType.Int) { Value = BatchSize });
+            using SqlCommand cmd = (SqlCommand)Connection.CreateCommand();
+            cmd.CommandText = BackendStoredProcedureName;
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add(new SqlParameter("@TableName", SqlDbType.NVarChar) { Value = TableName });
+            cmd.Parameters.Add(new SqlParameter("@NumberOfItems", SqlDbType.Int) { Value = BatchSize });
 
-                return (T)cmd.ExecuteScalar();
-            }
+            return (T)cmd.ExecuteScalar();
         }
 
         /// <summary>
